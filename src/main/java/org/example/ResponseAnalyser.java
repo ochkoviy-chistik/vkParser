@@ -9,8 +9,8 @@ public class ResponseAnalyser {
     public static boolean startAnalysis(ArrayList<UserModel> users) {
         for (UserModel user : users) {
 
-            if (Objects.equals(user.last_name, Main.searchingName)
-            || Objects.equals(user.first_name, Main.searchingName)) {
+            if (Objects.equals(user.last_name, Dispatcher.searchID)
+            || Objects.equals(user.first_name, Dispatcher.searchID)) {
                 return true;
             }
 

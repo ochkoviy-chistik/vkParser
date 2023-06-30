@@ -9,6 +9,6 @@ public class UserModel {
 
     @Override
     public String toString() {
-        return "%s (%s %s) -> %s".formatted(id, last_name, first_name, is_closed);
+        return "%s (%s %s) -> %s".formatted(id, last_name, first_name, (is_closed) ? "Закрытый": "Открытый");
     }
 }

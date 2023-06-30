@@ -22,12 +22,14 @@ class TooManyRequestsException
     }
 }
 
+/*
 class DeletedException
         extends Exception {
     public DeletedException(String msg) {
         super(msg);
     }
 }
+ */
 
 public class WebGetter {
     private final URI uri;
@@ -36,7 +38,7 @@ public class WebGetter {
         this.uri = new URI(uri);
     }
 
-    public ArrayList<UserModel> getResponse() throws IOException, TooManyRequestsException, DeletedException {
+    public ArrayList<UserModel> getResponse() throws IOException, TooManyRequestsException {
         URLConnection connection = (uri.toURL()).openConnection();
         BufferedReader br = new BufferedReader( new InputStreamReader(connection.getInputStream()) );
 
@@ -59,7 +61,6 @@ public class WebGetter {
 
             switch (errorNumber) {
                 case "6" -> throw new TooManyRequestsException("Too many requests per second!");
-                case "18" -> throw new DeletedException("User was deleted or banned!");
                 default -> System.out.println(jsonObject);
             }
         }
