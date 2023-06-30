@@ -5,6 +5,7 @@ public class UserModel {
     public String last_name;
     public String id;
     public boolean is_closed;
+    public String deactivated;
 
     @Override
     public String toString() {

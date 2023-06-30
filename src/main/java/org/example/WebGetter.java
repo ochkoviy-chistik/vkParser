@@ -3,6 +3,7 @@ package org.example;
 import com.google.gson.Gson;
 import models.UserModel;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -13,6 +14,21 @@ import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
+
+class TooManyRequestsException
+        extends Exception {
+    public TooManyRequestsException(String msg) {
+        super(msg);
+    }
+}
+
+class DeletedException
+        extends Exception {
+    public DeletedException(String msg) {
+        super(msg);
+    }
+}
+
 public class WebGetter {
     private final URI uri;
 
@@ -20,7 +36,7 @@ public class WebGetter {
         this.uri = new URI(uri);
     }
 
-    public ArrayList<UserModel> getResponse() throws IOException {
+    public ArrayList<UserModel> getResponse() throws IOException, TooManyRequestsException, DeletedException {
         URLConnection connection = (uri.toURL()).openConnection();
         BufferedReader br = new BufferedReader( new InputStreamReader(connection.getInputStream()) );
 
@@ -32,13 +48,33 @@ public class WebGetter {
         }
 
         JSONObject jsonObject = new JSONObject(builder.toString());
+        // System.out.println(jsonObject);
+        JSONArray userList;
 
-        JSONArray userList = new JSONArray(
-                jsonObject
-                        .getJSONObject("response")
-                        .get("items")
-                        .toString()
-        );
+        if (jsonObject.toString().contains("error")) {
+            String errorNumber = jsonObject
+                    .getJSONObject("error")
+                    .get("error_code")
+                    .toString();
+
+            switch (errorNumber) {
+                case "6" -> throw new TooManyRequestsException("Too many requests per second!");
+                case "18" -> throw new DeletedException("User was deleted or banned!");
+                default -> System.out.println(jsonObject);
+            }
+        }
+
+        try {
+            userList = new JSONArray(
+                    jsonObject
+                            .getJSONObject("response")
+                            .get("items")
+                            .toString()
+            );
+        } catch (JSONException e) {
+            System.out.println(jsonObject);
+            throw e;
+        }
 
         ArrayList<UserModel> dataList = new ArrayList<>();
 
