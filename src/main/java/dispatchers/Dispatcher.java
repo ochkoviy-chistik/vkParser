@@ -1,7 +1,12 @@
-package org.example;
+package dispatchers;
 
 import models.UserModel;
-import org.searchThread.SearchThread;
+import web.ResponseAnalyser;
+import web.exeptions.TooManyFriendsException;
+import web.exeptions.TooManyRequestsException;
+import web.VkApiUrlBuilder;
+import web.WebGetter;
+import web.searchThread.SearchThread;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -18,8 +23,10 @@ public class Dispatcher {
     ArrayList<UserModel> data;
     private final String userID;
     private final HashSet<String> visited = new HashSet<>();
-    private int deep;
-    private DispatcherResponseObserver dispatcherResponseObserver;
+    private final int deep;
+    private final DispatcherResponseObserver dispatcherResponseObserver;
+    private int userCount;
+    private double progressCount = 0;
 
     public Dispatcher(String userID, String searchID, int deep,
                       DispatcherResponseObserver dispatcherResponseObserver) {
@@ -47,6 +54,8 @@ public class Dispatcher {
                 data = getter.getResponse();
             } catch (TooManyRequestsException e) {
                 Thread.sleep(1000);
+            } catch (TooManyFriendsException e) {
+                break;
             }
         }
 
@@ -54,11 +63,19 @@ public class Dispatcher {
             dispatcherResponseObserver.addUser(this.userID);
         }
 
+        ArrayList<UserModel> users = new ArrayList<>();
+
+        for (UserModel user : data) {
+            if ((!user.is_closed)
+                    && (Objects.equals(user.deactivated, null))) {
+                users.add(user);
+            }
+        }
+
         if (deep > 0) {
-            for (UserModel user : data) {
-                if ((!user.is_closed)
-                        && (Objects.equals(user.deactivated, null))
-                        && (!visited.contains(user.id))) {
+            userCount = users.size();
+            for (UserModel user : users) {
+                if ((!visited.contains(user.id))) {
                     visited.add(user.id);
                     start(user, this.deep-1);
                 }
@@ -67,6 +84,8 @@ public class Dispatcher {
     }
 
     public void start(UserModel userModel, int deep) throws URISyntaxException, IOException, InterruptedException {
+        progressCount += (double) 100 / userCount;
+        if (this.deep - 1 == deep) dispatcherResponseObserver.setProgressInfo(progressCount);
 
         if (SearchThread.stop) return;
 
@@ -85,6 +104,8 @@ public class Dispatcher {
                 data = getter.getResponse();
             } catch (TooManyRequestsException e) {
                 Thread.sleep(1000);
+            } catch (TooManyFriendsException e) {
+                break;
             }
         }
 

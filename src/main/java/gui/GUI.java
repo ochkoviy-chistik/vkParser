@@ -1,8 +1,8 @@
-package org.gui;
+package gui;
 
-import org.example.Dispatcher;
-import org.example.DispatcherResponseObserver;
-import org.searchThread.SearchThread;
+import dispatchers.Dispatcher;
+import dispatchers.DispatcherResponseObserver;
+import web.searchThread.SearchThread;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +16,7 @@ public class GUI extends JFrame {
     private JLabel userStartLabel;
     private JTextField userStartField;
     public JTextArea responseArea;
-    private JProgressBar searchingProgressBar;
+    public JProgressBar searchingProgressBar;
     private JButton searchButton;
     private JButton stopButton;
     private JComboBox deepSelect;
@@ -34,6 +34,11 @@ public class GUI extends JFrame {
 
         searchButton.addActionListener(new StartFindListener());
         stopButton.addActionListener(new StopFindListener());
+
+        searchingProgressBar.setMinimum(0);
+        searchingProgressBar.setMaximum(99);
+
+        searchingProgressBar.setStringPainted(true);
 
         dispatcherResponseObserver.setGUI(this);
     }

@@ -1,7 +1,7 @@
 package org.example;
 
 
-import org.gui.GUI;
+import gui.GUI;
 
 import javax.swing.*;
 

@@ -1,5 +1,6 @@
-package org.example;
+package web;
 
+import dispatchers.Dispatcher;
 import models.UserModel;
 
 import java.util.ArrayList;

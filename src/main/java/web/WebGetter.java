@@ -1,10 +1,12 @@
-package org.example;
+package web;
 
 import com.google.gson.Gson;
 import models.UserModel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import web.exeptions.TooManyFriendsException;
+import web.exeptions.TooManyRequestsException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,22 +17,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 
 
-class TooManyRequestsException
-        extends Exception {
-    public TooManyRequestsException(String msg) {
-        super(msg);
-    }
-}
-
-/*
-class DeletedException
-        extends Exception {
-    public DeletedException(String msg) {
-        super(msg);
-    }
-}
- */
-
 public class WebGetter {
     private final URI uri;
 
@@ -38,7 +24,7 @@ public class WebGetter {
         this.uri = new URI(uri);
     }
 
-    public ArrayList<UserModel> getResponse() throws IOException, TooManyRequestsException {
+    public ArrayList<UserModel> getResponse() throws IOException, TooManyRequestsException, TooManyFriendsException {
         URLConnection connection = (uri.toURL()).openConnection();
         BufferedReader br = new BufferedReader( new InputStreamReader(connection.getInputStream()) );
 
@@ -53,22 +39,30 @@ public class WebGetter {
         // System.out.println(jsonObject);
         JSONArray userList;
 
-        if (jsonObject.toString().contains("error")) {
-            String errorNumber = jsonObject
-                    .getJSONObject("error")
-                    .get("error_code")
-                    .toString();
+        if (jsonObject.keySet().contains("error")) {
+            try {
+                String errorNumber = jsonObject
+                        .getJSONObject("error")
+                        .get("error_code")
+                        .toString();
 
-            switch (errorNumber) {
-                case "6" -> throw new TooManyRequestsException("Too many requests per second!");
-                default -> System.out.println(jsonObject);
+                switch (errorNumber) {
+                    case "6" -> throw new TooManyRequestsException("Too many requests per second!");
+                    default -> System.out.println(jsonObject);
+                }
+            } catch (JSONException e) {
+                System.out.println(jsonObject);
+                throw e;
             }
         }
 
+        JSONObject response = jsonObject.getJSONObject("response");
+
+        if ( (int) response.get("count") > 600) throw new TooManyFriendsException("Too many friends!");
+
         try {
             userList = new JSONArray(
-                    jsonObject
-                            .getJSONObject("response")
+                    response
                             .get("items")
                             .toString()
             );

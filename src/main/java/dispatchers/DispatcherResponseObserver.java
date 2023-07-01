@@ -1,7 +1,7 @@
-package org.example;
+package dispatchers;
 
 import models.UserModel;
-import org.gui.GUI;
+import gui.GUI;
 
 public class DispatcherResponseObserver {
     static private UserModel user;
@@ -22,6 +22,12 @@ public class DispatcherResponseObserver {
 
     public void addUser(String user) {
         this.gui.responseArea.append(user + "\n");
+    }
+
+    public void setProgressInfo(double per) {
+        this.gui.searchingProgressBar.setValue(
+                (int) per
+        );
     }
 
 }

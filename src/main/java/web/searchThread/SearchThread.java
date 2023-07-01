@@ -1,6 +1,6 @@
-package org.searchThread;
+package web.searchThread;
 
-import org.example.Dispatcher;
+import dispatchers.Dispatcher;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
